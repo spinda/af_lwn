@@ -25,7 +25,7 @@ class Af_Lwn extends Plugin {
       curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 
       if (defined('LWN_USER')) {
-        curl_setopt($ch, CURLOPT_URL, 'https://lwn.net/login');
+        curl_setopt($ch, CURLOPT_URL, 'https://lwn.net/Login/');
 
         $cookiejar = stream_get_meta_data(tmpfile())['uri'];
         curl_setopt($ch, CURLOPT_COOKIEJAR, $cookiejar);
@@ -46,7 +46,9 @@ class Af_Lwn extends Plugin {
 
       $html = curl_exec($ch);
       curl_close($ch);
-      unlink($cookiejar);
+      if (defined('LWN_USER')) {
+        unlink($cookiejar);
+      }
 
       $doc = new DOMDocument();
       @$doc->loadHTML($html);
