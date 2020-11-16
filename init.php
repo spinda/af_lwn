@@ -59,6 +59,24 @@ class Af_Lwn extends Plugin {
         $xpath = new DOMXPath($doc);
         $basenode = $xpath->query('//div[@class="ArticleText"]')->item(0);
 
+        // Fix relative links
+        $links = $xpath->query('//a');
+        foreach ($links as $link) {
+          $href = $link->getAttribute('href');
+          if (substr($href, 0, 1) === '/') {
+            $link->setAttribute('href', 'https://lwn.net' . $href);
+          }
+        }
+
+        // Fix relative forms
+        $links = $xpath->query('//form');
+        foreach ($links as $link) {
+          $action = $link->getAttribute('action');
+          if (substr($action, 0, 1) === '/') {
+            $link->setAttribute('action', 'https://lwn.net' . $action);
+          }
+        }
+
         if ($basenode) {
           $article["content"] = $doc->saveXML($basenode);
           $article["link"] = $full_url;
