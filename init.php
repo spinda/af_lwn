@@ -3,7 +3,7 @@
 class Af_Lwn extends Plugin {
   function about () {
     return array(
-      1.0,
+      1.1,
       "Fetch LWN full content (subscribers: set LWN_USER and LWN_PASS in config.php)",
       "spinda"
     );
