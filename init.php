@@ -3,9 +3,9 @@
 class Af_Lwn extends Plugin {
   function about () {
     return array(
-      1.1,
+      1.2,
       "Fetch LWN full content (subscribers: set LWN_USER and LWN_PASS in config.php)",
-      "spinda"
+      "spinda, das_j"
     );
   }
 
@@ -20,7 +20,7 @@ class Af_Lwn extends Plugin {
       curl_setopt($ch, CURLOPT_HEADER, false);
       curl_setopt($ch, CURLOPT_NOBODY, false);
 
-      curl_setopt($ch, CURLOPT_USERAGENT, SELF_USER_AGENT);
+      curl_setopt($ch, CURLOPT_USERAGENT, Config::get_user_agent());
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
       curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 
