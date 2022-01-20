@@ -3,9 +3,9 @@
 class Af_Lwn extends Plugin {
   function about () {
     return array(
-      1.0,
+      1.2,
       "Fetch LWN full content (subscribers: set LWN_USER and LWN_PASS in config.php)",
-      "spinda"
+      "spinda, das_j"
     );
   }
 
@@ -20,12 +20,12 @@ class Af_Lwn extends Plugin {
       curl_setopt($ch, CURLOPT_HEADER, false);
       curl_setopt($ch, CURLOPT_NOBODY, false);
 
-      curl_setopt($ch, CURLOPT_USERAGENT, SELF_USER_AGENT);
+      curl_setopt($ch, CURLOPT_USERAGENT, Config::get_user_agent());
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
       curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 
       if (defined('LWN_USER')) {
-        curl_setopt($ch, CURLOPT_URL, 'https://lwn.net/login');
+        curl_setopt($ch, CURLOPT_URL, 'https://lwn.net/Login/');
 
         $cookiejar = stream_get_meta_data(tmpfile())['uri'];
         curl_setopt($ch, CURLOPT_COOKIEJAR, $cookiejar);
@@ -46,7 +46,9 @@ class Af_Lwn extends Plugin {
 
       $html = curl_exec($ch);
       curl_close($ch);
-      unlink($cookiejar);
+      if (defined('LWN_USER')) {
+        unlink($cookiejar);
+      }
 
       $doc = new DOMDocument();
       @$doc->loadHTML($html);
@@ -56,6 +58,24 @@ class Af_Lwn extends Plugin {
       if ($doc) {
         $xpath = new DOMXPath($doc);
         $basenode = $xpath->query('//div[@class="ArticleText"]')->item(0);
+
+        // Fix relative links
+        $links = $xpath->query('//a');
+        foreach ($links as $link) {
+          $href = $link->getAttribute('href');
+          if (substr($href, 0, 1) === '/') {
+            $link->setAttribute('href', 'https://lwn.net' . $href);
+          }
+        }
+
+        // Fix relative forms
+        $links = $xpath->query('//form');
+        foreach ($links as $link) {
+          $action = $link->getAttribute('action');
+          if (substr($action, 0, 1) === '/') {
+            $link->setAttribute('action', 'https://lwn.net' . $action);
+          }
+        }
 
         if ($basenode) {
           $article["content"] = $doc->saveXML($basenode);
